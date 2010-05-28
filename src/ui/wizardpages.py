@@ -15,25 +15,28 @@ class Renderer(wx.grid.PyGridCellRenderer):
         wx.grid.PyGridCellRenderer.__init__(self)
         
     def Draw(self, grid, attr, dc, rect, row, col, isSelected):
+        f = attr.GetFont()
+        text = grid.GetCellValue(row, col)
+        if text == "0":
+            dc.SetTextForeground("#cccccc")
+            dc.SetBrush(wx.Brush("#eeeeee", wx.SOLID))
+        else:
+            f.SetWeight(wx.BOLD)
+            dc.SetTextForeground("BLACK")
+            dc.SetBrush(wx.Brush(wx.WHITE, wx.SOLID))
+           
+        
         dc.SetBackgroundMode(wx.SOLID)
-        dc.SetBrush(wx.Brush(wx.WHITE, wx.SOLID))
         dc.SetPen(wx.TRANSPARENT_PEN)
         dc.DrawRectangleRect(rect)
 
         dc.SetBackgroundMode(wx.TRANSPARENT)
-        f = attr.GetFont()
-        f.SetWeight(wx.BOLD)
         dc.SetFont(f)
 
-        text = grid.GetCellValue(row, col)
+        #text = grid.GetCellValue(row, col)
         w, h = dc.GetTextExtent(text)
         x = rect.x + 1 + (rect.width - w)/2
         y = rect.y + 1 + h
-
-        if text == "0":
-            dc.SetTextForeground("WHITE")
-        else:
-            dc.SetTextForeground("BLACK")
 
         for ch in text:
             dc.DrawText(ch, x, y)

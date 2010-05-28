@@ -47,6 +47,7 @@ class RedDeFlujo(object):
         print "BORRADO", nodo, "(%d)" % len(self.nodos)
             
     def conectar_nodos(self, nodo1, nodo2, capacidad, bidireccional):
+        capacidad = int(capacidad)
         if (type(nodo1) == type(nodo2) == Nodo):
             self.arcos[nodo1.nombre][nodo2.nombre] = capacidad
             if bidireccional == True:

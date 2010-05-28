@@ -75,7 +75,13 @@ class TablaDeArcos(wx.grid.PyGridTableBase):
         return self.data.obtener_arco(chr(97+row), chr(97+col))
     
     def SetValue(self, row, col, value):
-        self.data.conectar_nodos(chr(97+row), chr(97+col), value, False)
+        try:
+            self.data.conectar_nodos(chr(97+row), chr(97+col), value, False)
+        except ValueError:
+            return False
+        finally:
+            return True
+            
     
     # -------------
     # etiquetas!
