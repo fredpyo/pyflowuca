@@ -19,11 +19,10 @@ class Renderer(wx.grid.PyGridCellRenderer):
         text = grid.GetCellValue(row, col)
         if text == "0":
             dc.SetTextForeground("#cccccc")
-            dc.SetBrush(wx.Brush("#eeeeee", wx.SOLID))
         else:
             f.SetWeight(wx.BOLD)
             dc.SetTextForeground("BLACK")
-            dc.SetBrush(wx.Brush(wx.WHITE, wx.SOLID))
+        dc.SetBrush(wx.Brush(wx.WHITE, wx.SOLID))
            
         
         dc.SetBackgroundMode(wx.SOLID)

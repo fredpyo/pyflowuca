@@ -19,12 +19,12 @@ class TablaDeArcos(wx.grid.PyGridTableBase):
         wx.grid.PyGridTableBase.__init__(self)
         self.data = RedDeFlujo()
         
-        self.data.agregar_nuevo_nodo("a")
-        self.data.agregar_nuevo_nodo("b")
-        self.data.agregar_nuevo_nodo("c")
-        self.data.agregar_nuevo_nodo("d")
-        self.data.agregar_nuevo_nodo("e")
-        self.data.agregar_nuevo_nodo("f")
+        self.data.agregar_nuevo_nodo("A")
+        self.data.agregar_nuevo_nodo("B")
+        self.data.agregar_nuevo_nodo("C")
+        self.data.agregar_nuevo_nodo("D")
+        self.data.agregar_nuevo_nodo("E")
+        self.data.agregar_nuevo_nodo("F")
         
         print ">>>", len(self.data.nodos)
         
@@ -38,7 +38,7 @@ class TablaDeArcos(wx.grid.PyGridTableBase):
             print "MENOS"
             change = len(self.data.nodos) - i
             while (len(self.data.nodos) > i):
-                self.data.quitar_nodo(chr(97 + len(self.data.nodos) - 1))
+                self.data.quitar_nodo(chr(65 + len(self.data.nodos) - 1))
             # notify!
             msg = wx.grid.GridTableMessage(self, wx.grid.GRIDTABLE_NOTIFY_COLS_DELETED, len(self.data.nodos) + change, change)
             self.GetView().ProcessTableMessage(msg)
@@ -48,7 +48,7 @@ class TablaDeArcos(wx.grid.PyGridTableBase):
             print "MAS"
             change = i - len(self.data.nodos)
             while (len(self.data.nodos) < i):
-                self.data.agregar_nuevo_nodo(chr(97 + len(self.data.nodos)))
+                self.data.agregar_nuevo_nodo(chr(65 + len(self.data.nodos)))
             # notify!
             msg = wx.grid.GridTableMessage(self, wx.grid.GRIDTABLE_NOTIFY_COLS_APPENDED, change)
             self.GetView().ProcessTableMessage(msg)
@@ -72,11 +72,11 @@ class TablaDeArcos(wx.grid.PyGridTableBase):
         return False
     
     def GetValue(self, row, col):
-        return self.data.obtener_arco(chr(97+row), chr(97+col))
+        return self.data.obtener_arco(chr(65+row), chr(65+col))
     
     def SetValue(self, row, col, value):
         try:
-            self.data.conectar_nodos(chr(97+row), chr(97+col), value, False)
+            self.data.conectar_nodos(chr(65+row), chr(65+col), value, False)
         except ValueError:
             return False
         finally:
@@ -87,10 +87,10 @@ class TablaDeArcos(wx.grid.PyGridTableBase):
     # etiquetas!
     
     def GetColLabelValue(self, col):
-        return chr(col + 97)
+        return chr(col + 65)
     
     def GetRowLabelValue(self, row):
-        return chr(row + 97)
+        return chr(row + 65)
     
     
     
