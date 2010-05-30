@@ -23,9 +23,11 @@ class Renderer(wx.grid.PyGridCellRenderer):
         else:
             f.SetWeight(wx.BOLD)
             dc.SetTextForeground("BLACK")
-        dc.SetBrush(wx.Brush(wx.WHITE, wx.SOLID))
-           
-        
+
+        if (row == col):
+            dc.SetBrush(wx.Brush("#f6f6f6", wx.SOLID))
+        else:
+            dc.SetBrush(wx.Brush(wx.WHITE, wx.SOLID))
         dc.SetBackgroundMode(wx.SOLID)
         dc.SetPen(wx.TRANSPARENT_PEN)
         dc.DrawRectangleRect(rect)
@@ -122,7 +124,7 @@ class PaginaCrearRed(AeroPage):
         self.panel_vista_previa.SetAutoLayout(1)
         self.panel_vista_previa.SetBackgroundColour(wx.WHITE)
         self.panel_vista_previa.SetSizer(wx.BoxSizer(wx.VERTICAL))
-        self.panel_vista_previa.GetSizer().Add(self.bitmap_grafo, 0, wx.EXPAND)
+        self.panel_vista_previa.GetSizer().Add(self.bitmap_grafo, 0, wx.EXPAND | wx.ALIGN_CENTER_VERTICAL)
         self.graficador = GraficoDeRed(self.datos_de_arcos.GetRed())
         hb.Add(self.panel_vista_previa, 0, wx.EXPAND)
         self.content.Add(hb, 0, wx.BOTTOM, 20)

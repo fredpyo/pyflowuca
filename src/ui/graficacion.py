@@ -25,11 +25,12 @@ class GraficoDeRed(object):
         
     def graficar_red(self):
         self.grafico = pydot.Dot('rdf', graph_type='digraph')
+        self.grafico.set_fontname("Arial")
         self.grafico.set_rankdir("LR") # esto es para que vaya de izquierda a derecha!!!
         print "GRAFICAR..."
         # agregar cada nodo
         for nodo in self.red.nodos:
-            ng = pydot.Node(nodo.nombre, style="filled", fillcolor="#f6f6f6", color="#000000", fontsize="8", shape="circle")
+            ng = pydot.Node(nodo.nombre, style="filled", fillcolor="#f6f6f6", color="#000000", fontsize="12", shape="circle", fontname="Arial")
             self.grafico.add_node(ng)
         # crear los arcos entre los nodos
         for a in self.red.nodos:
@@ -37,7 +38,7 @@ class GraficoDeRed(object):
                 v = self.red.obtener_arco(a.nombre, b.nombre)
                 # solo crear el arco si su peso es > 0
                 if v > 0:
-                    edge = pydot.Edge(a.nombre, b.nombre, color="#669966", labelfontcolor="#669966", fontsize="8.0", label="%d" % (v))
+                    edge = pydot.Edge(a.nombre, b.nombre, color="#004365", labelfontcolor="#004365", fontsize="10.0", fontname="Arial", label="%d" % (v))
                     self.grafico.add_edge(edge)
     
     def get_wx_image(self):
