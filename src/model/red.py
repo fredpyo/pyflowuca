@@ -9,6 +9,7 @@ class RedDeFlujo(object):
     def __init__(self):
         self.nodos = []
         self.arcos = {}
+        self.profundidad_maxima = 0
     
     def __nuevo_nodo(self, nodo):
         self.arcos[nodo.nombre] = {}
@@ -46,7 +47,7 @@ class RedDeFlujo(object):
                 self.nodos.remove(n)
         print "BORRADO", nodo, "(%d)" % len(self.nodos)
             
-    def conectar_nodos(self, nodo1, nodo2, capacidad, bidireccional):
+    def conectar_nodos(self, nodo1, nodo2, capacidad, bidireccional = False):
         capacidad = int(capacidad)
         if (type(nodo1) == type(nodo2) == Nodo):
             self.arcos[nodo1.nombre][nodo2.nombre] = capacidad
@@ -73,19 +74,59 @@ class RedDeFlujo(object):
         except KeyError:
             return 0
         
-    def obtener_arcos(self):
+    def obtener_arcos(self, nodo_origen = None):
         '''
-        Retorna una lista de tuplas de arcos
+        Retorna una lista de tuplas de arcos de todo el grafo o de un nodo en particular
         (nombre origen, nombre destino, capacidad)
         '''
         arcos = []
-        for a in self.nodos:
-            for b in self.nodos:
-                v = self.obtener_arco(a.nombre, b.nombre)
+        if nodo_origen == None:
+            for a in self.nodos:
+                for b in self.nodos:
+                    v = self.obtener_arco(a.nombre, b.nombre)
+                    if v > 0:
+                        arcos.append((a.nombre, b.nombre, v))
+        else:
+            for a in self.nodos:
+                v = self.obtener_arco(nodo_origen, a.nombre)
                 if v > 0:
-                    arcos.append((a.nombre, b.nombre, v))
+                    arcos.append((nodo_origen, a.nombre, v))    
         return arcos
-                
+    
+    def obtener_rutas(self, origen, destino):
+        self.profundidad_maxima = len(self.nodos)
+        arbol = []
+        if origen in [n.nombre for n in self.nodos] and destino in [n.nombre for n in self.nodos]:
+            arbol = self.__recorrer(origen)
+        return self.__concatenar_arbol(arbol)
+    
+    def __recorrer(self, nodo, profundidad = 0):
+        if profundidad == self.profundidad_maxima:
+            return None
+        x = []
+        for a in self.obtener_arcos(nodo):
+            x = x + self.__recorrer(a[1], profundidad + 1)
+        #x = [self.__recorrer(a[1], profundidad + 1) for a in self.obtener_arcos(nodo)]
+        if len(x) > 0:
+            return [nodo, x]
+        return [nodo]
+        
+    def __concatenar_arbol(self, arbol):
+        '''
+        Convierte una representación de arbol:
+        ["A",["B","C",["D","E"]]]
+        a:
+        [["A","B"],["A","C","D"],["A","C","E"]]
+        '''
+        s = []
+        for i in arbol:
+            if type(i) != list:
+                s.append([i])
+            else:
+                l = s.pop()
+                for x in self.__concatenar_arbol(i):
+                    s.append(l+x)
+        return s
                 
     def __str__(self):
         #print [x.nombre for x in self.nodos]
@@ -106,17 +147,48 @@ class Nodo(object):
     
 if __name__ == "__main__":
     r = RedDeFlujo()
-    r.agregar_nuevo_nodo("a")
-    r.agregar_nuevo_nodo("b")
-    r.agregar_nuevo_nodo("c")
-    r.agregar_nuevo_nodo("d")
-    r.agregar_nuevo_nodo("e")
     
-    r.conectar_nodos("a", "b", 12, True)
-    r.conectar_nodos("a", "c", 5, True)
-    r.conectar_nodos("b", "c", 8, True)
-    r.conectar_nodos("b", "d", 8, True)
-    r.conectar_nodos("c", "e", 7, True)
-    r.conectar_nodos("d", "e", 20, True)
-    print r
+    r.agregar_nuevo_nodo("O")
+    r.agregar_nuevo_nodo("A")
+    r.agregar_nuevo_nodo("B")
+    r.agregar_nuevo_nodo("C")
+    r.agregar_nuevo_nodo("D")
+    r.agregar_nuevo_nodo("E")
+    r.agregar_nuevo_nodo("T")
+    
+    r.conectar_nodos("O", "A", 5)
+    r.conectar_nodos("O", "B", 7)
+    r.conectar_nodos("O", "C", 4)
+    r.conectar_nodos("A", "B", 1)
+    r.conectar_nodos("A", "D", 3)
+    r.conectar_nodos("B", "C", 2)
+    r.conectar_nodos("B", "D", 4)
+    r.conectar_nodos("B", "E", 5)
+    r.conectar_nodos("C", "E", 4)
+    r.conectar_nodos("D", "T", 9)
+    r.conectar_nodos("E", "D", 1)
+    r.conectar_nodos("E", "T", 6)
+    
+    rutas = r.obtener_rutas("O","T")
+    
+    print rutas
+    print len(rutas)
+    
+    """
+    # prueba
+    for i in ["A","B","C","D","E"]:
+        r.agregar_nuevo_nodo(i)
+    
+    r.conectar_nodos("A", "B", 9)
+    r.conectar_nodos("A", "C", 7)
+    r.conectar_nodos("B", "E", 5)
+    r.conectar_nodos("B", "D", 5)
+    r.conectar_nodos("C", "B", 5)
+    r.conectar_nodos("C", "E", 3)
+    r.conectar_nodos("E", "D", 8)
+    
+    r.obtener_rutas("A","D")
+    """
+    
+    
         
