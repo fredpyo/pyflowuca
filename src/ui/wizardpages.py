@@ -107,6 +107,8 @@ class PaginaCrearRed(AeroPage):
         
         hb = wx.BoxSizer(wx.HORIZONTAL)
         # tabla de arcos
+        box = wx.StaticBox(self, -1, u"Capacidad de los arcos")
+        bsizer = wx.StaticBoxSizer(box, wx.VERTICAL)
         self.tabla_de_arcos = wx.grid.Grid(self, -1, (-1, -1), (500, 300))
         self.datos_de_arcos = TablaDeArcos()
         self.tabla_de_arcos.SetDefaultCellAlignment(wx.ALIGN_CENTER, wx.ALIGN_CENTER)
@@ -114,19 +116,23 @@ class PaginaCrearRed(AeroPage):
         self.tabla_de_arcos.SetDefaultRowSize(40)
         self.tabla_de_arcos.SetDefaultRenderer(Renderer())
         self.tabla_de_arcos.Bind(wx.grid.EVT_GRID_CELL_CHANGE, self.OnCellChange)
-        hb.Add(self.tabla_de_arcos, 1, wx.EXPAND)
+        bsizer.Add(self.tabla_de_arcos, 1, wx.EXPAND)
+        hb.Add(bsizer, 1, wx.EXPAND)
         hb.AddSpacer(10)
         
         # vista previa
+        box = wx.StaticBox(self, -1, u"Vista previa")
+        bsizer = wx.StaticBoxSizer(box, wx.VERTICAL)
         self.panel_vista_previa = scrolledpanel.ScrolledPanel(self, -1, size=(500,300))
         self.panel_vista_previa.SetBackgroundColour("#000000")
         self.bitmap_grafo = wx.StaticBitmap(self.panel_vista_previa, -1)
         self.panel_vista_previa.SetAutoLayout(1)
         self.panel_vista_previa.SetBackgroundColour(wx.WHITE)
         self.panel_vista_previa.SetSizer(wx.BoxSizer(wx.VERTICAL))
-        self.panel_vista_previa.GetSizer().Add(self.bitmap_grafo, 0, wx.EXPAND | wx.ALIGN_CENTER_VERTICAL)
+        self.panel_vista_previa.GetSizer().Add(self.bitmap_grafo, 1, wx.ALIGN_CENTER_HORIZONTAL | wx.ALIGN_CENTER_VERTICAL)
         self.graficador = GraficoDeRed(self.datos_de_arcos.GetRed())
-        hb.Add(self.panel_vista_previa, 0, wx.EXPAND)
+        bsizer.Add(self.panel_vista_previa, 0, wx.EXPAND)
+        hb.Add(bsizer, 0, wx.EXPAND)
         self.content.Add(hb, 0, wx.BOTTOM, 20)
         
         
@@ -134,6 +140,7 @@ class PaginaCrearRed(AeroPage):
         if event.GetShow():
             self.tabla_de_arcos.SetTable(self.datos_de_arcos)
             self.wizard.LayoutFitCenter()
+            self.ActualizarVistaPrevia()
             
     def OnSpin(self, event):
         self.datos_de_arcos.SetSize(event.EventObject.GetValue())
@@ -146,6 +153,13 @@ class PaginaCrearRed(AeroPage):
         
     def ActualizarVistaPrevia(self):
         self.graficador.graficar_red()
-        self.bitmap_grafo.SetBitmap(wx.BitmapFromImage(self.graficador.get_wx_image()))
+        image = self.graficador.get_wx_image()
+        bitmap = wx.BitmapFromImage(image)
+#        print image.GetSize(), self.bitmap_grafo.GetParent().GetSize()
+#        if (image.GetSize()[0] > self.bitmap_grafo.GetParent().GetSize()[0]):
+#            bitmap.SetSize(self.bitmap_grafo.GetParent().GetSize())
+#        else:
+#            bitmap.SetSize(image.GetSize())
+        self.bitmap_grafo.SetBitmap(bitmap)
         self.bitmap_grafo.GetParent().Refresh()
         self.panel_vista_previa.SetupScrolling()
