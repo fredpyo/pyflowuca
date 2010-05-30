@@ -22,9 +22,6 @@ class TablaDeArcos(wx.grid.PyGridTableBase):
         self.data.agregar_nuevo_nodo("A")
         self.data.agregar_nuevo_nodo("B")
         self.data.agregar_nuevo_nodo("C")
-        self.data.agregar_nuevo_nodo("D")
-        self.data.agregar_nuevo_nodo("E")
-        self.data.agregar_nuevo_nodo("F")
         
         print ">>>", len(self.data.nodos)
         
