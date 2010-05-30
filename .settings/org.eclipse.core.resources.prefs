@@ -1,8 +1,9 @@
-#Fri May 28 23:25:02 PKT 2010
+#Sun May 30 06:14:26 PKT 2010
 eclipse.preferences.version=1
 encoding//src/model/red.py=utf-8
 encoding//src/pyflow.py=utf-8
 encoding//src/ui/aerowizard.py=utf-8
+encoding//src/ui/graficacion.py=utf-8
 encoding//src/ui/gridtables.py=utf-8
 encoding//src/ui/wizardpages.py=utf-8
 encoding/<project>=UTF-8

@@ -9,6 +9,7 @@ import wx.grid
 import wx.lib.scrolledpanel as scrolledpanel
 from aerowizard import AeroPage, AeroStaticText
 from gridtables import TablaDeArcos
+from ui.graficacion import GraficoDeRed
 
 class Renderer(wx.grid.PyGridCellRenderer):
     def __init__(self):
@@ -110,23 +111,39 @@ class PaginaCrearRed(AeroPage):
         self.tabla_de_arcos.SetDefaultColSize(40)
         self.tabla_de_arcos.SetDefaultRowSize(40)
         self.tabla_de_arcos.SetDefaultRenderer(Renderer())
+        self.tabla_de_arcos.Bind(wx.grid.EVT_GRID_CELL_CHANGE, self.OnCellChange)
         hb.Add(self.tabla_de_arcos, 1, wx.EXPAND)
         hb.AddSpacer(10)
+        
         # vista previa
         self.panel_vista_previa = scrolledpanel.ScrolledPanel(self, -1, size=(500,300))
         self.panel_vista_previa.SetBackgroundColour("#000000")
+        self.bitmap_grafo = wx.StaticBitmap(self.panel_vista_previa, -1)
+        self.panel_vista_previa.SetAutoLayout(1)
+        self.panel_vista_previa.SetBackgroundColour(wx.WHITE)
+        self.panel_vista_previa.SetSizer(wx.BoxSizer(wx.VERTICAL))
+        self.panel_vista_previa.GetSizer().Add(self.bitmap_grafo, 0, wx.EXPAND)
+        self.graficador = GraficoDeRed(self.datos_de_arcos.GetRed())
         hb.Add(self.panel_vista_previa, 0, wx.EXPAND)
         self.content.Add(hb, 0, wx.BOTTOM, 20)
         
+        
     def OnShow(self, event):
         if event.GetShow():
-            print "HOLA MUNDO"
             self.tabla_de_arcos.SetTable(self.datos_de_arcos)
             self.wizard.LayoutFitCenter()
-            print "HOLA MUNDO"
             
     def OnSpin(self, event):
         self.datos_de_arcos.SetSize(event.EventObject.GetValue())
-        print ">Z>L;SDPLASMDOASMDOKASMDOK MS AOKDMAS OKDMOKASDMOK"
         self.tabla_de_arcos.Refresh()
         self.tabla_de_arcos.ForceRefresh()
+        self.ActualizarVistaPrevia()
+        
+    def OnCellChange(self, event):
+        self.ActualizarVistaPrevia()
+        
+    def ActualizarVistaPrevia(self):
+        self.graficador.graficar_red()
+        self.bitmap_grafo.SetBitmap(wx.BitmapFromImage(self.graficador.get_wx_image()))
+        self.bitmap_grafo.GetParent().Refresh()
+        self.panel_vista_previa.SetupScrolling()
