@@ -72,6 +72,20 @@ class RedDeFlujo(object):
             return self.arcos[nodo1][nodo2]
         except KeyError:
             return 0
+        
+    def obtener_arcos(self):
+        '''
+        Retorna una lista de tuplas de arcos
+        (nombre origen, nombre destino, capacidad)
+        '''
+        arcos = []
+        for a in self.nodos:
+            for b in self.nodos:
+                v = self.obtener_arco(a.nombre, b.nombre)
+                if v > 0:
+                    arcos.append((a.nombre, b.nombre, v))
+        return arcos
+                
                 
     def __str__(self):
         #print [x.nombre for x in self.nodos]
