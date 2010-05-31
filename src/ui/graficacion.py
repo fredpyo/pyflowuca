@@ -29,7 +29,6 @@ class GraficoDeRed(object):
         self.grafico = pydot.Dot('rdf', graph_type='digraph')
         self.grafico.set_fontname("Arial")
         self.grafico.set_rankdir("LR") # esto es para que vaya de izquierda a derecha!!!
-        print "GRAFICAR..."
         # agregar cada nodo
         for nodo in self.red.nodos:
             ng = pydot.Node(nodo.nombre, style="filled", fillcolor="#f6f6f6", color="#000000", fontsize="12", shape="circle", fontname="Arial")
@@ -40,6 +39,10 @@ class GraficoDeRed(object):
             self.grafico.add_edge(edge)
             
     def resaltar_activos(self, a, b):
+        '''
+        Resalta los nodos a y b, cambiando su color y creando (o modificando)
+        el arco existente entre estos dos dandole otro color
+        '''
         # resaltar destino
         nodo = self.grafico.get_node(b)
         nodo.set_fillcolor("#e6ecff")
@@ -48,13 +51,25 @@ class GraficoDeRed(object):
         nodo = self.grafico.get_node(a)
         nodo.set_fillcolor("#bac9ff")
         nodo.set_color("#4e73ff")
-        
+        # modificar o agregar arco
+        e = self.grafico.get_edge(a, b)
+        if e:
+            e.set_color("#4e73ff")
+        else:
+            edge = pydot.Edge(a, b, color="#4e73ff")
+            self.grafico.add_edge(edge)
     
     def get_wx_image(self):
         '''
         Genera una imagen temporal y retorna una instancia de un object wx.Image
         '''
         self.grafico.write_png(os.path.join(self.temp, "grafico.png"))
-        print os.path.join(self.temp, "grafico.png")
         return wx.Image(os.path.join(self.temp, "grafico.png"), wx.BITMAP_TYPE_ANY)
-        
+    
+    def __del__(self):
+        '''
+        Limpiar los archivos temporales
+        '''
+        print "LIMPIEZA"
+        os.remove(os.path.join(self.temp, "grafico.png"))
+        os.rmdir(self.temp)

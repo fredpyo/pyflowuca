@@ -18,21 +18,17 @@ class TablaDeArcos(wx.grid.PyGridTableBase):
     def __init__(self):
         wx.grid.PyGridTableBase.__init__(self)
         self.data = RedDeFlujo()
-        
+        # precargar
         self.data.agregar_nuevo_nodo("A")
         self.data.agregar_nuevo_nodo("B")
         self.data.agregar_nuevo_nodo("C")
-        
-        print ">>>", len(self.data.nodos)
         
     def GetRed(self):
         '''Retornar la red almacenada en esta tabla'''
         return self.data
     
     def SetSize(self, i):
-        print len(self.data.nodos), self.data.nodos
         if (i < len(self.data.nodos)):
-            print "MENOS"
             change = len(self.data.nodos) - i
             while (len(self.data.nodos) > i):
                 self.data.quitar_nodo(chr(65 + len(self.data.nodos) - 1))
@@ -42,7 +38,6 @@ class TablaDeArcos(wx.grid.PyGridTableBase):
             msg = wx.grid.GridTableMessage(self, wx.grid.GRIDTABLE_NOTIFY_ROWS_DELETED, len(self.data.nodos) + change, change)
             self.GetView().ProcessTableMessage(msg)
         if (i > len(self.data.nodos)):
-            print "MAS"
             change = i - len(self.data.nodos)
             while (len(self.data.nodos) < i):
                 self.data.agregar_nuevo_nodo(chr(65 + len(self.data.nodos)))
@@ -56,13 +51,9 @@ class TablaDeArcos(wx.grid.PyGridTableBase):
     # Cosas requeridas por PyGridTable
     
     def GetNumberRows(self):
-        print self.data.nodos
-        print "COLS"
         return len(self.data.nodos)
     
     def GetNumberCols(self):
-        print self.data.nodos
-        print "COLS"
         return len(self.data.nodos)
     
     def IsEmptyCell(self, row, col):
@@ -78,7 +69,6 @@ class TablaDeArcos(wx.grid.PyGridTableBase):
             return False
         finally:
             return True
-            
     
     # -------------
     # etiquetas!
@@ -88,7 +78,3 @@ class TablaDeArcos(wx.grid.PyGridTableBase):
     
     def GetRowLabelValue(self, row):
         return chr(row + 65)
-    
-    
-    
-        
