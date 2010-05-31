@@ -35,10 +35,9 @@ class Renderer(wx.grid.PyGridCellRenderer):
         dc.SetBackgroundMode(wx.TRANSPARENT)
         dc.SetFont(f)
 
-        #text = grid.GetCellValue(row, col)
         w, h = dc.GetTextExtent(text)
         x = rect.x + 1 + (rect.width - w)/2
-        y = rect.y + 1 + h
+        y = rect.y + 1 + (rect.height - h)/2
 
         for ch in text:
             dc.DrawText(ch, x, y)
@@ -109,13 +108,14 @@ class PaginaCrearRed(AeroPage):
         # tabla de arcos
         box = wx.StaticBox(self, -1, u"Capacidad de los arcos")
         bsizer = wx.StaticBoxSizer(box, wx.VERTICAL)
-        self.tabla_de_arcos = wx.grid.Grid(self, -1, (-1, -1), (500, 300))
+        self.tabla_de_arcos = wx.grid.Grid(self, -1, (-1, -1), (400, 300))
         self.datos_de_arcos = TablaDeArcos()
         self.tabla_de_arcos.SetDefaultCellAlignment(wx.ALIGN_CENTER, wx.ALIGN_CENTER)
-        self.tabla_de_arcos.SetDefaultColSize(40)
-        self.tabla_de_arcos.SetDefaultRowSize(40)
+        self.tabla_de_arcos.SetDefaultColSize(36)
+        self.tabla_de_arcos.SetDefaultRowSize(36)
         self.tabla_de_arcos.SetDefaultRenderer(Renderer())
         self.tabla_de_arcos.Bind(wx.grid.EVT_GRID_CELL_CHANGE, self.OnCellChange)
+        self.tabla_de_arcos.Bind(wx.grid.EVT_GRID_SELECT_CELL, self.OnCellSelect)
         bsizer.Add(self.tabla_de_arcos, 1, wx.EXPAND)
         hb.Add(bsizer, 1, wx.EXPAND)
         hb.AddSpacer(10)
@@ -123,7 +123,7 @@ class PaginaCrearRed(AeroPage):
         # vista previa
         box = wx.StaticBox(self, -1, u"Vista previa")
         bsizer = wx.StaticBoxSizer(box, wx.VERTICAL)
-        self.panel_vista_previa = scrolledpanel.ScrolledPanel(self, -1, size=(500,300))
+        self.panel_vista_previa = scrolledpanel.ScrolledPanel(self, -1, size=(400,300))
         self.panel_vista_previa.SetBackgroundColour("#000000")
         self.bitmap_grafo = wx.StaticBitmap(self.panel_vista_previa, -1)
         self.panel_vista_previa.SetAutoLayout(1)
@@ -134,7 +134,6 @@ class PaginaCrearRed(AeroPage):
         bsizer.Add(self.panel_vista_previa, 0, wx.EXPAND)
         hb.Add(bsizer, 0, wx.EXPAND)
         self.content.Add(hb, 0, wx.BOTTOM, 20)
-        
         
     def OnShow(self, event):
         if event.GetShow():
@@ -151,8 +150,18 @@ class PaginaCrearRed(AeroPage):
     def OnCellChange(self, event):
         self.ActualizarVistaPrevia()
         
-    def ActualizarVistaPrevia(self):
+    def OnCellSelect(self, event):
+        if event.Selecting():
+            self.ActualizarVistaPrevia((chr(65 + event.GetRow()), chr(65 + event.GetCol())))
+        event.Skip()
+        
+    def ActualizarVistaPrevia(self, seleccionados = None):
         self.graficador.graficar_red()
+        
+        if seleccionados != None:
+            self.graficador.resaltar_activos(seleccionados[0], seleccionados[1])
+        
+        #self.graficador.resaltar_activos(a, b)
         image = self.graficador.get_wx_image()
         bitmap = wx.BitmapFromImage(image)
 #        print image.GetSize(), self.bitmap_grafo.GetParent().GetSize()

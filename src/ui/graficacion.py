@@ -38,6 +38,17 @@ class GraficoDeRed(object):
         for a in self.red.obtener_arcos():
             edge = pydot.Edge(a[0], a[1], color="#004365", labelfontcolor="#004365", fontsize="10.0", fontname="Arial", label="%d" % (a[2]))
             self.grafico.add_edge(edge)
+            
+    def resaltar_activos(self, a, b):
+        # resaltar destino
+        nodo = self.grafico.get_node(b)
+        nodo.set_fillcolor("#e6ecff")
+        nodo.set_color("#4e73ff")
+        # resaltar origen
+        nodo = self.grafico.get_node(a)
+        nodo.set_fillcolor("#bac9ff")
+        nodo.set_color("#4e73ff")
+        
     
     def get_wx_image(self):
         '''
