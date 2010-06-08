@@ -59,10 +59,25 @@ class GraficoDeRed(object):
             edge = pydot.Edge(a, b, color="#4e73ff")
             self.grafico.add_edge(edge)
     
+    def marcar_origen_y_destino(self, origen, destino):
+        '''
+        Marca en el grafo los nodos de origen y destino
+        '''
+        try:
+#            e = pydot.Edge("", origen, color="#004365")
+#            self.grafico.add_edge(e)
+            nodo = self.grafico.get_node(origen)
+            nodo.set_shape("diamond")
+            nodo = self.grafico.get_node(destino)
+            nodo.set_shape("doublecircle")
+        except:
+            pass
+    
     def get_wx_image(self):
         '''
         Genera una imagen temporal y retorna una instancia de un object wx.Image
         '''
+        print os.path.join(self.temp, "grafico.png")
         self.grafico.write_png(os.path.join(self.temp, "grafico.png"))
         return wx.Image(os.path.join(self.temp, "grafico.png"), wx.BITMAP_TYPE_ANY)
     
@@ -71,5 +86,11 @@ class GraficoDeRed(object):
         Limpiar los archivos temporales
         '''
         print "LIMPIEZA"
-        os.remove(os.path.join(self.temp, "grafico.png"))
-        os.rmdir(self.temp)
+        try:
+            os.remove(os.path.join(self.temp, "grafico.png"))
+        except:
+            pass
+        try:
+            os.rmdir(self.temp)
+        except:
+            pass

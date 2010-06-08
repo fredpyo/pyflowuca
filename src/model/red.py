@@ -10,6 +10,8 @@ class RedDeFlujo(object):
         self.nodos = []
         self.arcos = {}
         self.profundidad_maxima = 0
+        self.origen = None
+        self.destino = None
     
     def __nuevo_nodo(self, nodo):
         self.arcos[nodo.nombre] = {}
@@ -136,7 +138,27 @@ class RedDeFlujo(object):
                 print x[0], y[0], y[1]
         #return ""
         return "%s" % (",".join([str(x) for x in self.nodos]))    
-    
+
+class RedResidual(object):
+    def __init__(self, red):
+        '''
+        Crear una red residual a partir de la red normal
+        '''
+        self.red = red
+        self.nodos = [n.nombre for n in red.nodos]
+        # generar la matriz de arcos N x N
+        self.arcos = {}
+        for a in self.nodos:
+            arcos = {}
+            for b in self.nodos:
+                arcos[b] = red.obtener_arco(a, b)
+            
+            self.arcos[a.nombre] = arcos
+
+    def solucionar(self):
+        pass
+        
+
 class Nodo(object):
     def __init__(self, nombre):
         self.nombre = nombre
@@ -173,22 +195,3 @@ if __name__ == "__main__":
     
     print rutas
     print len(rutas)
-    
-    """
-    # prueba
-    for i in ["A","B","C","D","E"]:
-        r.agregar_nuevo_nodo(i)
-    
-    r.conectar_nodos("A", "B", 9)
-    r.conectar_nodos("A", "C", 7)
-    r.conectar_nodos("B", "E", 5)
-    r.conectar_nodos("B", "D", 5)
-    r.conectar_nodos("C", "B", 5)
-    r.conectar_nodos("C", "E", 3)
-    r.conectar_nodos("E", "D", 8)
-    
-    r.obtener_rutas("A","D")
-    """
-    
-    
-        

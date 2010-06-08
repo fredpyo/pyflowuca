@@ -11,6 +11,8 @@ from aerowizard import AeroPage, AeroStaticText
 from gridtables import TablaDeArcos
 from ui.graficacion import GraficoDeRed
 
+data = {"red" : None}
+
 class Renderer(wx.grid.PyGridCellRenderer):
     def __init__(self):
         wx.grid.PyGridCellRenderer.__init__(self)
@@ -155,20 +157,134 @@ class PaginaCrearRed(AeroPage):
             self.ActualizarVistaPrevia((chr(65 + event.GetRow()), chr(65 + event.GetCol())))
         event.Skip()
         
+    def OnNext(self):
+        data["red"] = self.datos_de_arcos.GetRed()
+        return True
+        
     def ActualizarVistaPrevia(self, seleccionados = None):
         self.graficador.graficar_red()
         
         if seleccionados != None:
             self.graficador.resaltar_activos(seleccionados[0], seleccionados[1])
         
-        #self.graficador.resaltar_activos(a, b)
         image = self.graficador.get_wx_image()
         bitmap = wx.BitmapFromImage(image)
-#        print image.GetSize(), self.bitmap_grafo.GetParent().GetSize()
-#        if (image.GetSize()[0] > self.bitmap_grafo.GetParent().GetSize()[0]):
-#            bitmap.SetSize(self.bitmap_grafo.GetParent().GetSize())
-#        else:
-#            bitmap.SetSize(image.GetSize())
         self.bitmap_grafo.SetBitmap(bitmap)
         self.bitmap_grafo.GetParent().Refresh()
         self.panel_vista_previa.SetupScrolling()
+
+class PaginaIndicarFuenteYDestino(AeroPage):
+    def __init__(self, parent, data):
+        AeroPage.__init__(self, parent, u"Fuente y destino de la red")
+        instrucciones = AeroStaticText(self, -1, u"Indique el nodo origen y el nodo destino de la red.")
+        self.content.Add(instrucciones, 0, wx.BOTTOM, 10)
+        
+        hb = wx.BoxSizer(wx.HORIZONTAL)
+        # origen y destino
+        box = wx.StaticBox(self, -1, u"Origen y Destino")
+        bsizer = wx.StaticBoxSizer(box, wx.VERTICAL)
+        self.combo_origen = wx.ComboBox(self, -1)
+        self.combo_destino = wx.ComboBox(self, -1)
+        self.combo_origen.Bind(wx.EVT_COMBOBOX, self.OnCombo)
+        self.combo_destino.Bind(wx.EVT_COMBOBOX, self.OnCombo)
+        fgs = wx.FlexGridSizer(2, 2, 2, 2)
+        fgs.AddMany([wx.StaticText(self, -1, u"Origen:"),
+                     self.combo_origen,
+                     wx.StaticText(self, -1, u"Destino:"),
+                     self.combo_destino
+                     ])
+        bsizer.Add(fgs)
+        hb.Add(bsizer, 0, wx.EXPAND)
+        hb.AddSpacer(10)
+        
+        
+        # vista previa
+        box = wx.StaticBox(self, -1, u"Vista previa")
+        bsizer = wx.StaticBoxSizer(box, wx.VERTICAL)
+        self.panel_vista_previa = scrolledpanel.ScrolledPanel(self, -1, size=(400,300))
+        self.panel_vista_previa.SetBackgroundColour("#000000")
+        self.bitmap_grafo = wx.StaticBitmap(self.panel_vista_previa, -1)
+        self.panel_vista_previa.SetAutoLayout(1)
+        self.panel_vista_previa.SetBackgroundColour(wx.WHITE)
+        self.panel_vista_previa.SetSizer(wx.BoxSizer(wx.VERTICAL))
+        self.panel_vista_previa.GetSizer().Add(self.bitmap_grafo, 1, wx.ALIGN_CENTER_HORIZONTAL | wx.ALIGN_CENTER_VERTICAL)
+        bsizer.Add(self.panel_vista_previa, 0, wx.EXPAND)
+        hb.Add(bsizer, 0, wx.EXPAND)
+        self.content.Add(hb, 0, wx.BOTTOM, 20)
+        
+    def OnShow(self, event):
+        if event.GetShow():
+            self.graficador = GraficoDeRed(data["red"])
+            self.combo_origen.Clear()
+            self.combo_origen.AppendItems([n.nombre for n in data["red"].nodos])
+            self.combo_destino.Clear()
+            self.combo_destino.AppendItems([n.nombre for n in data["red"].nodos])
+    
+    def OnCombo(self, event):
+        self.ActualizarVistaPrevia()
+        print len(self.combo_origen.GetValue())
+        print len(self.combo_destino.GetValue())
+        if len(self.combo_origen.GetValue()) != 0 and len(self.combo_destino.GetValue()) != 0:
+            self.wizard.UpdateButtons()
+            print "AOKFMOKMAOKSMDOKAMS"
+        else:
+            self.wizard.UpdateButtons()
+    
+    def ActualizarVistaPrevia(self):
+        self.graficador.graficar_red()
+        self.graficador.marcar_origen_y_destino(self.combo_origen.GetValue(), self.combo_destino.GetValue()) 
+
+        image = self.graficador.get_wx_image()
+        bitmap = wx.BitmapFromImage(image)
+        self.bitmap_grafo.SetBitmap(bitmap)
+        self.bitmap_grafo.GetParent().Refresh()
+        self.panel_vista_previa.SetupScrolling()
+    
+    def GetNext(self):
+        if len(self.combo_origen.GetValue()) == 0 or len(self.combo_destino.GetValue()) == 0:
+            return False
+        else:
+            #print AeroPage.GetNext(self)
+            return AeroPage.GetNext(self)
+            #return self._GetNextOrDefault()
+    
+    def OnNext(self):
+        data["red"].origen = self.combo_origen.GetValue()
+        data["red"].destino = self.combo_destino.GetValue()
+        return True
+
+class PaginaSolucion(AeroPage):
+    def __init__(self, parent, data):
+        AeroPage.__init__(self, parent, u"¡No hay problema!")
+        instrucciones = AeroStaticText(self, -1, u"Solución del problema:")
+        self.content.Add(instrucciones, 0, wx.BOTTOM, 10)
+        
+        self.panel_vista_previa = scrolledpanel.ScrolledPanel(self, -1, size=(400,300))
+        self.panel_vista_previa.SetBackgroundColour("#000000")
+        self.bitmap_grafo = wx.StaticBitmap(self.panel_vista_previa, -1)
+        self.panel_vista_previa.SetAutoLayout(1)
+        self.panel_vista_previa.SetBackgroundColour(wx.WHITE)
+        self.panel_vista_previa.SetSizer(wx.BoxSizer(wx.VERTICAL))
+        self.panel_vista_previa.GetSizer().Add(self.bitmap_grafo, 1, wx.ALIGN_CENTER_HORIZONTAL | wx.ALIGN_CENTER_VERTICAL)
+        
+        self.content.Add(self.panel_vista_previa, 1, wx.EXPAND | wx.BOTTOM, 20)
+        
+        # botones
+        bmps = [wx.Bitmap("ui/img/media-"+x, wx.BITMAP_TYPE_PNG) for x in ["skip-backward.png", "playback-start.png", "playback-pause.png", "skip-forward.png"]]
+        buttons = [wx.BitmapButton(self, -1, bmp, (-1,-1),(bmp.GetWidth() + 20, bmp.GetHeight() + 10)) for bmp in bmps]
+        #bmp_play = wx.Bitmap("ui/img/media-playback-start.png", wx.BITMAP_TYPE_PNG)
+        #b = wx.BitmapButton(self, -1, bmp_play, (-1,-1),(bmp_play.GetWidth() + 10, bmp_play.GetHeight() + 10))
+        #self.content.Add(b)
+        hb = wx.BoxSizer(wx.HORIZONTAL)
+        #hb.AddMany([b for b in buttons])
+        for b in buttons:
+            hb.Add(b, 0, wx.ALIGN_CENTER_VERTICAL, 0)
+        buttons[1].Show(False)
+        self.slider_tiempo = wx.Slider(self, -1, 0, 0, 15, style = wx.SL_HORIZONTAL | wx.SL_AUTOTICKS)
+        hb.Add(self.slider_tiempo, 1, wx.EXPAND, 0)
+        self.content.Add(hb, 0, wx.EXPAND | wx.BOTTOM, 20)
+        
+        
+    def OnShow(self, event):
+        if event.GetShow():
+            self.graficador = GraficoDeRed(data["red"])
