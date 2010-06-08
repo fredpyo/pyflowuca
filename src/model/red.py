@@ -5,6 +5,8 @@ Created on 28/05/2010
 @author: Federico Cáceres <fede.caceres@gmail.com>
 '''
 
+from copy import deepcopy
+
 class RedDeFlujo(object):
     def __init__(self):
         self.nodos = []
@@ -131,12 +133,9 @@ class RedDeFlujo(object):
         return s
                 
     def __str__(self):
-        #print [x.nombre for x in self.nodos]
-        #print [x for x in self.arcos.iteritems()]
         for x in self.arcos.iteritems():
             for y in x[1].iteritems():
                 print x[0], y[0], y[1]
-        #return ""
         return "%s" % (",".join([str(x) for x in self.nodos]))    
 
 class RedResidual(object):
@@ -146,17 +145,52 @@ class RedResidual(object):
         '''
         self.red = red
         self.nodos = [n.nombre for n in red.nodos]
-        # generar la matriz de arcos N x N
-        self.arcos = {}
+        self.iteraciones = []
+        # generar la matriz de arcos N x N para la iteración 0
+        self.iteraciones.append({})
         for a in self.nodos:
             arcos = {}
             for b in self.nodos:
                 arcos[b] = red.obtener_arco(a, b)
-            
-            self.arcos[a.nombre] = arcos
+            self.iteraciones[0][a] = arcos
+        print self.iteraciones[0]
+
+    def nueva_iteracion(self):
+        self.iteraciones.append(deepcopy(self.iteraciones[self.i()]))
+
+    def i(self):
+        ''' Retorna el número de iteración actual '''
+        return len(self.iteraciones) - 1
+
+    def __pathfinder(self, path):
+        for x in self.nodos:
+            if x not in path and self.iteraciones[self.i()][path[-1]][x] > 0:
+                new_path = path + [x]
+                if x == self.red.destino:
+                    return new_path
+                else: 
+                    y = self.__pathfinder(new_path)
+                    if y == None:
+                        continue
+                    else:
+                        return y
+        return None
 
     def solucionar(self):
-        pass
+        path = self.__pathfinder([self.red.origen])
+        while path != None:
+            print "#####", path
+            # realizar una nueva iteración
+            if len(path) > 1:
+                # se haya la capacidad residual de la trayectoria de aumento
+                self.nueva_iteracion()
+                capacidad_residual = min([self.iteraciones[self.i()][path[i]][path[i+1]] for i in range(len(path)-1)])
+                # se resta la capacidad residual de los arcos en la trayectoria de aumento
+                for i in range(len(path) - 1):
+                    self.iteraciones[self.i()][path[i]][path[i+1]] -= capacidad_residual
+                    self.iteraciones[self.i()][path[i+1]][path[i]] += capacidad_residual 
+            path = self.__pathfinder([self.red.origen])
+#                continuar = True
         
 
 class Nodo(object):

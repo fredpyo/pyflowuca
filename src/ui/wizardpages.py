@@ -10,6 +10,8 @@ import wx.lib.scrolledpanel as scrolledpanel
 from aerowizard import AeroPage, AeroStaticText
 from gridtables import TablaDeArcos
 from ui.graficacion import GraficoDeRed
+from model.red import RedResidual
+from wx._core import EVT_SLIDER
 
 data = {"red" : None}
 
@@ -222,11 +224,8 @@ class PaginaIndicarFuenteYDestino(AeroPage):
     
     def OnCombo(self, event):
         self.ActualizarVistaPrevia()
-        print len(self.combo_origen.GetValue())
-        print len(self.combo_destino.GetValue())
         if len(self.combo_origen.GetValue()) != 0 and len(self.combo_destino.GetValue()) != 0:
             self.wizard.UpdateButtons()
-            print "AOKFMOKMAOKSMDOKAMS"
         else:
             self.wizard.UpdateButtons()
     
@@ -259,7 +258,9 @@ class PaginaSolucion(AeroPage):
         instrucciones = AeroStaticText(self, -1, u"Solución del problema:")
         self.content.Add(instrucciones, 0, wx.BOTTOM, 10)
         
-        self.panel_vista_previa = scrolledpanel.ScrolledPanel(self, -1, size=(400,300))
+        self.red_residual = None
+        
+        self.panel_vista_previa = scrolledpanel.ScrolledPanel(self, -1, size=(650,300))
         self.panel_vista_previa.SetBackgroundColour("#000000")
         self.bitmap_grafo = wx.StaticBitmap(self.panel_vista_previa, -1)
         self.panel_vista_previa.SetAutoLayout(1)
@@ -279,12 +280,36 @@ class PaginaSolucion(AeroPage):
         #hb.AddMany([b for b in buttons])
         for b in buttons:
             hb.Add(b, 0, wx.ALIGN_CENTER_VERTICAL, 0)
-        buttons[1].Show(False)
+            b.Show(False)
         self.slider_tiempo = wx.Slider(self, -1, 0, 0, 15, style = wx.SL_HORIZONTAL | wx.SL_AUTOTICKS)
+        self.Bind(EVT_SLIDER, self.OnTick, self.slider_tiempo)
         hb.Add(self.slider_tiempo, 1, wx.EXPAND, 0)
         self.content.Add(hb, 0, wx.EXPAND | wx.BOTTOM, 20)
         
         
     def OnShow(self, event):
         if event.GetShow():
-            self.graficador = GraficoDeRed(data["red"])
+            self.red_residual = RedResidual(data["red"])
+            self.graficador = GraficoDeRed(self.red_residual)
+            self.red_residual.solucionar()
+            self.slider_tiempo.SetRange(0,self.red_residual.i())
+            self.ActualizarVistaPrevia()
+    
+    def OnTick(self, event):
+        self.ActualizarVistaPrevia(self.slider_tiempo.GetValue())
+        
+    
+    def ActualizarVistaPrevia(self, i = None):
+        #self.graficador.graficar_red()
+        print "IIIIIII", self.red_residual.i()
+        for x in self.red_residual.iteraciones:
+            print x
+        if i == None:
+            i = self.red_residual.i()
+        self.graficador.graficar_iteracion(i)
+        image = self.graficador.get_wx_image()
+        bitmap = wx.BitmapFromImage(image)
+        self.bitmap_grafo.SetBitmap(bitmap)
+        self.bitmap_grafo.GetParent().Refresh()
+        self.panel_vista_previa.SetupScrolling()
+            

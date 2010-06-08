@@ -9,6 +9,7 @@ import os.path
 import pydot
 import tempfile
 import wx
+from model.red import RedDeFlujo, RedResidual
 
 class GraficoDeRed(object):
     '''
@@ -20,7 +21,12 @@ class GraficoDeRed(object):
         Constructor
         '''
         self.temp = tempfile.mkdtemp()
-        self.red = red
+        # dependiendo de si es una red normal o una aumentada, se sacan los datos de diferentes lugares
+        if type(red) == RedDeFlujo:
+            self.red = red
+        else:
+            self.red_aumentada = red
+            self.red = self.red_aumentada.red
         
     def graficar_red(self):
         '''
@@ -37,6 +43,18 @@ class GraficoDeRed(object):
         for a in self.red.obtener_arcos():
             edge = pydot.Edge(a[0], a[1], color="#004365", labelfontcolor="#004365", fontsize="10.0", fontname="Arial", label="%d" % (a[2]))
             self.grafico.add_edge(edge)
+            
+    def graficar_iteracion(self, i):
+        self.graficar_red()
+        self.marcar_origen_y_destino(self.red.origen, self.red.destino)
+        # marcar las capacidades residuales
+        for e in self.grafico.get_edges():
+#            print e, dir(e)
+            a = e.get_source()
+            b = e.get_destination()
+            e.set_label("         ")
+            e.set_headlabel(str(self.red_aumentada.iteraciones[i][b][a]))
+            e.set_taillabel(str(self.red_aumentada.iteraciones[i][a][b]))
             
     def resaltar_activos(self, a, b):
         '''
